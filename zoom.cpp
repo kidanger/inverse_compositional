@@ -191,3 +191,61 @@ void zoom_in_parameters
       break;
   }
 }
+
+/**
+  *
+  * Function to downsample the parameters of the transformation
+  *
+**/
+void zoom_out_parameters
+(
+  double *p,    //input parameters
+  double *pout, //output parameters
+  int nparams,  //number of parameters
+  int nx,       //width of the original image
+  int ny,       //height of the original image
+  int nxx,      //width of the zoomed image
+  int nyy       //height of the zoomed image
+)
+{
+  //compute the zoom factor
+  double factorx=((double)nxx/nx);
+  double factory=((double)nyy/ny);
+  double nu=(factorx>factory)?factorx:factory;
+
+  switch(nparams) {
+    default: case TRANSLATION_TRANSFORM: //p=(tx, ty)
+      pout[0]=p[0]*nu;
+      pout[1]=p[1]*nu;
+      break;
+    case EUCLIDEAN_TRANSFORM: //p=(tx, ty, tita)
+      pout[0]=p[0]*nu;
+      pout[1]=p[1]*nu;
+      pout[2]=p[2];
+      break;
+    case SIMILARITY_TRANSFORM: //p=(tx, ty, a, b)
+      pout[0]=p[0]*nu;
+      pout[1]=p[1]*nu;
+      pout[2]=p[2];
+      pout[3]=p[3];
+      break;
+    case AFFINITY_TRANSFORM: //p=(tx, ty, a00, a01, a10, a11)
+      pout[0]=p[0]*nu;
+      pout[1]=p[1]*nu;
+      pout[2]=p[2];
+      pout[3]=p[3];
+      pout[4]=p[4];
+      pout[5]=p[5];
+      break;
+    case HOMOGRAPHY_TRANSFORM: //p=(h00, h01,..., h21)
+      pout[0]=p[0];
+      pout[1]=p[1];
+      pout[2]=p[2]*nu;
+      pout[3]=p[3];
+      pout[4]=p[4];
+      pout[5]=p[5]*nu;
+      pout[6]=p[6]/nu;
+      pout[7]=p[7]/nu;
+      break;
+  }
+}

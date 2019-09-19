@@ -700,6 +700,9 @@ void pyramidal_inverse_compositional_algorithm(
       //zoom the mask from the previous scale, using specific interpolation
       zoom_out_mask(M1s[s-1], M1s[s], nx[s-1], ny[s-1], nzz, nu);
       zoom_out_mask(M2s[s-1], M2s[s], nx[s-1], ny[s-1], nzz, nu);
+
+      //zoom out the parameters, so that the coarser scale gets initialized properly
+      zoom_out_parameters(ps[s-1], ps[s], nparams, nx[s-1], ny[s-1], nx[s], ny[s]);
     }
 
     // apply the masks on the downscaled images
@@ -720,10 +723,6 @@ void pyramidal_inverse_compositional_algorithm(
         delete []M1s[i];
         delete []M2s[i];
     }
-
-    //initialization of the transformation parameters at the coarsest scale
-    for(int i=0; i<nparams; i++)
-        ps[nscales-1][i]=0.0;
 
     //pyramidal approach for computing the transformation
     for(int s=nscales-1; s>= first_scale; s--)

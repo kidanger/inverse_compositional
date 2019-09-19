@@ -347,6 +347,9 @@ int main (int argc, char *argv[])
 
       //allocate memory for the parametric model
       double *p=new double[nparams];
+      for (int i=0; i<nparams; i++) {
+        p[i] = 0.;
+      }
 
       if( graymethod && nz==3 ) {
         //convert images to grayscale

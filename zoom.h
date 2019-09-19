@@ -71,4 +71,20 @@ void zoom_in_parameters
   int nyy       //height of the zoomed image
 );
 
+/**
+  *
+  * Function to downsample the parameters of the transformation
+  *
+**/
+void zoom_out_parameters
+(
+  double *p,    //input image
+  double *pout, //output image   
+  int nparams,  //number of parameters
+  int nx,       //width of the original image
+  int ny,       //height of the original image
+  int nxx,      //width of the zoomed image
+  int nyy       //height of the zoomed image
+);
+
 #endif
