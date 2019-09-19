@@ -19,7 +19,7 @@
  */
 bool read_image
 (
-  char *fname,  //file name
+  const char *fname,  //file name
   double **f,   //output image
   int &nx,      //number of columns of the image
   int &ny,      //number of rows of the image
@@ -28,7 +28,7 @@ bool read_image
 
 bool read_image
 (
-  char *fname,  //file name
+  const char *fname,  //file name
   float **f,    //output image
   int &nx,      //number of columns of the image
   int &ny,      //number of rows of the image
@@ -42,7 +42,7 @@ bool read_image
  */
 void save_image
 (
-  char *fname,  //file name
+  const char *fname,  //file name
   double *f,    //output image
   int nx,       //number of columns of the image
   int ny,       //number of rows of the image
@@ -52,7 +52,7 @@ void save_image
 
 void save_normalize_image
 (
-  char *fname,  //file name
+  const char *fname,  //file name
   double *f,    //output image
   int nx,       //number of columns of the image
   int ny,       //number of rows of the image
@@ -62,7 +62,7 @@ void save_normalize_image
 
 void save_image
 (
-  char *fname,  //file name
+  const char *fname,  //file name
   float *f,     //output image
   int nx,       //number of columns of the image
   int ny,       //number of rows of the image
@@ -76,7 +76,7 @@ void save_image
  */
 void save_flow
 (
-  char *file, //file name
+  const char *file, //file name
   double *u,  //x component of the optical flow
   double *v,  //y component of the optical flow
   int nx,     //number of columns
@@ -92,7 +92,7 @@ void save_flow
  */
 void read
 (
-  char *file,   //input file name
+  const char *file,   //input file name
   double **p,   //parameters to be read
   int &nparams, //number of parameters
   int &nx,      //number of columns
@@ -108,7 +108,7 @@ void read
  */
 void save
 (
-  char *file,  //output file name
+  const char *file,  //output file name
   double *p,   //parameters to be saved
   int nparams, //number of parameters
   int nx,      //number of columns

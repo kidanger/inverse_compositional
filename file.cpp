@@ -25,27 +25,27 @@ extern "C"
  */
 bool read_image
 (
-  char *fname,  //file name
+  const char *fname,  //file name
   double **f,   //output image
   int &nx,      //number of columns of the image
   int &ny,      //number of rows of the image
   int &nz       //number of channels of the image
 )
 {
-  *f = iio_read_image_double_vec(fname, &nx, &ny, &nz);
+  *f = iio_read_image_double_vec((char*) fname, &nx, &ny, &nz);
   return *f ? true : false;
 }
 
 bool read_image
 (
-  char *fname,  //file name
+  const char *fname,  //file name
   float **f,    //output image
   int &nx,      //number of columns of the image
   int &ny,      //number of rows of the image
   int &nz       //number of channels of the image
 )
 {
-  *f = iio_read_image_float_vec(fname, &nx, &ny, &nz);
+  *f = iio_read_image_float_vec((char*) fname, &nx, &ny, &nz);
   return *f ? true : false;
 }
 
@@ -56,7 +56,7 @@ bool read_image
  */
 void save_image
 (
-  char *fname,  //file name
+  const char *fname,  //file name
   double *f,    //output image
   int nx,       //number of columns of the image
   int ny,       //number of rows of the image
@@ -65,13 +65,13 @@ void save_image
 {
   float *ff=new float[nx*ny*nz];
   for(int i=0;i<nx*ny*nz;i++) ff[i]=(float)f[i];
-  iio_write_image_float_vec(fname, ff, nx, ny, nz);
+  iio_write_image_float_vec((char*) fname, ff, nx, ny, nz);
   delete []ff;
 }
 
 void save_normalize_image
 (
-  char *fname,  //file name
+  const char *fname,  //file name
   double *f,    //output image
   int nx,       //number of columns of the image
   int ny,       //number of rows of the image
@@ -89,21 +89,21 @@ void save_normalize_image
   for(int i=0;i<nx*ny*nz;i++) ff[i]=255.0;
   if(max>min)
     for(int i=0;i<nx*ny*nz;i++) ff[i]=(float)255.0*(f[i]-min)/(max-min);
-  iio_write_image_float_vec(fname, ff, nx, ny, nz);
+  iio_write_image_float_vec((char*) fname, ff, nx, ny, nz);
   delete []ff;
 }
 
 
 void save_image
 (
-  char *fname,  //file name
+  const char *fname,  //file name
   float *f,     //output image
   int nx,       //number of columns of the image
   int ny,       //number of rows of the image
   int nz        //number of channels of the image
 )
 {
-  iio_write_image_float_vec(fname, f, nx, ny, nz);
+  iio_write_image_float_vec((char*) fname, f, nx, ny, nz);
 }
 
 /**
@@ -113,7 +113,7 @@ void save_image
  */
 void save_flow
 (
-  char *file, //file name
+  const char *file, //file name
   double *u,  //x component of the optical flow
   double *v,  //y component of the optical flow
   int nx,     //number of columns
@@ -127,7 +127,7 @@ void save_flow
       f[2*i]=u[i];
       f[2*i+1]=v[i];
     }
-  iio_write_image_float_vec (file, f, nx, ny, 2);
+  iio_write_image_float_vec ((char*) file, f, nx, ny, 2);
   delete []f;
 }
 
@@ -140,7 +140,7 @@ void save_flow
  */
 void read
 (
-  char *file,   //input file name
+  const char *file,   //input file name
   double **p,   //parameters to be read
   int &nparams, //number of parameters
   int &nx,      //number of columns
@@ -173,7 +173,7 @@ void read
  */
 void save
 (
-  char *file,  //output file name
+  const char *file,  //output file name
   double *p,   //parameters to be saved
   int nparams, //number of parameters
   int nx,      //number of columns

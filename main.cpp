@@ -104,7 +104,7 @@ int read_parameters(
     char   *argv[],
     char   **image1,
     char   **image2,
-    char   *outfile,
+    char   const **outfile,
     int    &nscales,
     double &zfactor,
     double &TOL,
@@ -130,7 +130,7 @@ int read_parameters(
     *image2=strdup(argv[i++]);
 
     //assign default values to the parameters
-    strcpy(outfile,PAR_DEFAULT_OUTFILE);
+    *outfile     =PAR_DEFAULT_OUTFILE;
     nscales      =PAR_DEFAULT_NSCALES;
     zfactor      =PAR_DEFAULT_ZFACTOR;
     TOL          =PAR_DEFAULT_TOL;
@@ -150,7 +150,7 @@ int read_parameters(
     {
       if(strcmp(argv[i],"-f")==0)
         if(i<argc-1)
-          strcpy(outfile,argv[++i]);
+          *outfile = argv[++i];
 
       if(strcmp(argv[i],"-n")==0)
         if(i<argc-1)
@@ -283,14 +283,15 @@ void rgb2gray(
 int main (int argc, char *argv[])
 {
   //parameters of the method
-  char  *image1, *image2, outfile[200];
+  char  *image1, *image2;
+  const char *outfile;
   int    nscales, nparams, robust, verbose, first_scale, graymethod;
   int    delta, nanifoutside, type_gradient, type_output;
   double zfactor, TOL, lambda;
 
   //read the parameters from the console
   int result=read_parameters(
-        argc, argv, &image1, &image2, outfile, nscales,
+        argc, argv, &image1, &image2, &outfile, nscales,
         zfactor, TOL, nparams, robust, lambda, verbose, first_scale,
         graymethod, delta, nanifoutside, type_gradient, type_output
       );
@@ -330,7 +331,8 @@ int main (int argc, char *argv[])
     if (correct1 && correct2 && nx == nx1 && ny == ny1 && nz == nz1)
     {
       //limit the number of scales according to image size (min 32x32)
-      int N=1+log(std::min(nx, ny)/32.)/log(1./zfactor);
+      int limit = 32;
+      int N=1+log(std::min(nx, ny)/(float)limit)/log(1./zfactor);
       if (N<nscales || nscales <= 0) nscales= N;
 
       if(verbose)
