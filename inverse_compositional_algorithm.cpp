@@ -632,6 +632,8 @@ void robust_inverse_compositional_algorithm(
 void pyramidal_inverse_compositional_algorithm(
     double *I1,        //first image
     double *I2,        //second image
+    double *M1,        //first mask
+    double *M2,        //second mask
     double *p,         //parameters of the transform
     int nparams,       //number of parameters
     int nxx,           //image width
@@ -653,6 +655,8 @@ void pyramidal_inverse_compositional_algorithm(
 
     double **I1s=new double*[nscales];
     double **I2s=new double*[nscales];
+    bool **M1s=new bool*[nscales];
+    bool **M2s=new bool*[nscales];
     double **ps =new double*[nscales];
 
     int *nx=new int[nscales];
@@ -660,12 +664,16 @@ void pyramidal_inverse_compositional_algorithm(
 
     I1s[0]=new double[size];
     I2s[0]=new double[size];
+    M1s[0]=new bool[size];
+    M2s[0]=new bool[size];
 
-    //copy the input images
+    //copy the input images and mask
     for(int i=0;i<size;i++)
     {
       I1s[0][i]=I1[i];
       I2s[0][i]=I2[i];
+      M1s[0][i]=M1 ? M1[i] > 0 : true;
+      M2s[0][i]=M2 ? M2[i] > 0 : true;
     }
 
     ps[0]=p;
@@ -681,17 +689,36 @@ void pyramidal_inverse_compositional_algorithm(
 
       I1s[s]=new double[size*nzz];
       I2s[s]=new double[size*nzz];
+      M1s[s]=new bool[size*nzz];
+      M2s[s]=new bool[size*nzz];
       ps[s] =new double[nparams];
 
       //zoom the images from the previous scale
       zoom_out(I1s[s-1], I1s[s], nx[s-1], ny[s-1], nzz, nu);
       zoom_out(I2s[s-1], I2s[s], nx[s-1], ny[s-1], nzz, nu);
+
+      //zoom the mask from the previous scale, using specific interpolation
+      zoom_out_mask(M1s[s-1], M1s[s], nx[s-1], ny[s-1], nzz, nu);
+      zoom_out_mask(M2s[s-1], M2s[s], nx[s-1], ny[s-1], nzz, nu);
+    }
+
+    // apply the masks on the downscaled images
+    for(int s=0; s<nscales; s++)
+    {
+      for (long i=0; i<nx[s]*ny[s]*nzz; i++) {
+        if (!M1s[s][i])
+          I1s[s][i] = NAN;
+        if (!M2s[s][i])
+          I2s[s][i] = NAN;
+      }
     }
 
     //delete allocated memory for unused scales
     for (int i=0; i<first_scale; i++) {
         delete []I1s[i];
         delete []I2s[i];
+        delete []M1s[i];
+        delete []M2s[i];
     }
 
     //initialization of the transformation parameters at the coarsest scale
@@ -732,6 +759,8 @@ void pyramidal_inverse_compositional_algorithm(
       //delete allocated memory
       delete []I1s[s];
       delete []I2s[s];
+      delete []M1s[s];
+      delete []M2s[s];
     }
 
     //Upsample the parameters
@@ -746,6 +775,8 @@ void pyramidal_inverse_compositional_algorithm(
         delete []ps [i];
     delete []I1s;
     delete []I2s;
+    delete []M1s;
+    delete []M2s;
     delete []ps;
     delete []nx;
     delete []ny;

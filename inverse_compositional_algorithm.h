@@ -105,6 +105,8 @@ void robust_inverse_compositional_algorithm(
 void pyramidal_inverse_compositional_algorithm(
     double *I1,       //first image
     double *I2,       //second image
+    double *M1,       //first mask
+    double *M2,       //second mask
     double *p,        //parameters of the transform
     int    nparams,   //number of parameters
     int    nxx,       //image width

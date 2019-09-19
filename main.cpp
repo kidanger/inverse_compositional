@@ -16,6 +16,7 @@
 #include "inverse_compositional_algorithm.h"
 #include "file.h"
 #include "transformation.h"
+#include "bicubic_interpolation.h"
 
 #define PAR_DEFAULT_NSCALES 0
 #define PAR_DEFAULT_ZFACTOR 0.5
@@ -51,6 +52,7 @@ void print_help(char *name)
   printf(" -o N    \t Output transformation format: \n");
   printf("         \t   0-Parametrization\n");
   printf("         \t   1-3x3 Projective matrix\n");
+  printf("         \t   2-image\n");
   printf("         \t   Default value %d\n", PAR_DEFAULT_OUTPUT);
   printf(" -n N    \t Number of scales for the coarse-to-fine scheme\n");
   printf("         \t   Default value %d\n", PAR_DEFAULT_NSCALES);
@@ -124,8 +126,8 @@ int read_parameters(
   }
   else{
     int i=1;
-    *image1=argv[i++];
-    *image2=argv[i++];
+    *image1=strdup(argv[i++]);
+    *image2=strdup(argv[i++]);
 
     //assign default values to the parameters
     strcpy(outfile,PAR_DEFAULT_OUTFILE);
@@ -223,7 +225,7 @@ int read_parameters(
         graymethod=PAR_DEFAULT_GRAYMETHOD;
     if(type_gradient<0 || type_gradient>5)
         type_gradient=PAR_DEFAULT_TYPE_GRADIENT;
-    if(type_output<0 || type_output>1)
+    if(type_output<0 || type_output>2)
         type_output  =PAR_DEFAULT_OUTPUT;
   }
 
@@ -299,9 +301,30 @@ int main (int argc, char *argv[])
 
     double *I1, *I2;
 
+    char* maskimage1 = strstr(image1, ":");
+    char* maskimage2 = strstr(image2, ":");
+    if (maskimage1) {
+      *maskimage1 = 0;
+      maskimage1++;
+    }
+    if (maskimage2) {
+      *maskimage2 = 0;
+      maskimage2++;
+    }
+
     //read the input images
     bool correct1=read_image(image1, &I1, nx, ny, nz);
     bool correct2=read_image(image2, &I2, nx1, ny1, nz1);
+
+    double *M1 = nullptr, *M2 = nullptr;
+    if (maskimage1) {
+      correct1 &= read_image(maskimage1, &M1, nx, ny, nz);
+      printf("use mask for image1\n");
+    }
+    if (maskimage2) {
+      correct2 &= read_image(maskimage2, &M2, nx, ny, nz);
+      printf("use mask for image2\n");
+    }
 
     // if the images are correct, compute the estimated motion
     if (correct1 && correct2 && nx == nx1 && ny == ny1 && nz == nz1)
@@ -331,14 +354,21 @@ int main (int argc, char *argv[])
         rgb2gray(I1, I1g, nx, ny, nz);
         rgb2gray(I2, I2g, nx, ny, nz);
 
-        //free memory
-        free (I1);
-        free (I2);
+        double* M1g = nullptr;
+        if (M1) {
+          M1g=new double[nx*ny];
+          rgb2gray(M1, M1g, nx, ny, nz);
+        }
+        double* M2g = nullptr;
+        if (M2) {
+          M2g=new double[nx*ny];
+          rgb2gray(M2, M2g, nx, ny, nz);
+        }
 
         //compute the optic flow
         const clock_t begin = clock();
         pyramidal_inverse_compositional_algorithm(
-           I1g, I2g, p, nparams, nx, ny, 1,
+           I1g, I2g, M1g, M2g, p, nparams, nx, ny, 1,
            nscales, zfactor, TOL, robust, lambda, first_scale, nanifoutside,
            delta, type_gradient, verbose
         );
@@ -349,39 +379,50 @@ int main (int argc, char *argv[])
         //free memory
         delete[]I1g;
         delete[]I2g;
+        delete[]M1g;
+        delete[]M2g;
       }
       else {
         //compute the optic flow
         const clock_t begin = clock();
         pyramidal_inverse_compositional_algorithm(
-           I1, I2, p, nparams, nx, ny, nz,
+           I1, I2, M1, M2, p, nparams, nx, ny, nz,
            nscales, zfactor, TOL, robust, lambda, first_scale, nanifoutside,
            delta, type_gradient, verbose
         );
 
         if(verbose)
            printf("Time=%f\n", double(clock()-begin)/CLOCKS_PER_SEC);
-        //free memory
-        free (I1);
-        free (I2);
       }
 
       //save the parametric model to disk
-      if(type_output) {
+      if(type_output == 1) {
         double mat[9];
         params2matrix(p, mat, nparams);
         save_matrix(outfile, mat, 9);
-        if(verbose) {
-          printf("Transform: ");
-          for(int j=0; j<9; j++) printf("%.14lg ", mat[j]);
-          printf("\n");
-        }
-      }
-      else
+      } else if (type_output == 0) {
         save(outfile, p, nparams);
+      } else if (type_output == 2) {
+        double *Iw=new double[nx*ny*nz];
+        bicubic_interpolation(I2, Iw, p, nparams, nx, ny, nz, 0, 1);
+        save_image(outfile, Iw, nx, ny, nz);
+        delete[] Iw;
+      }
+      if(verbose) {
+        double mat[9];
+        params2matrix(p, mat, nparams);
+        printf("Transform: ");
+        for(int j=0; j<9; j++) printf("%.14lg ", mat[j]);
+        printf("\n");
+      }
 
       //free memory
       delete[]p;
+      //free memory
+      free (I1);
+      free (I2);
+      free (M1);
+      free (M2);
     }
     else
     {

@@ -36,7 +36,22 @@ void zoom_out
   double *Iout, //output image
   int nx,       //image width
   int ny,       //image height
-  int nz,       // number of color channels in image              
+  int nz,       // number of color channels in image
+  double factor = 0.5 //zoom factor between 0 and 1
+);
+
+/**
+  *
+  * Function to downsample the mask
+  *
+**/
+void zoom_out_mask
+(
+  bool *I,    //input image
+  bool *Iout, //output image
+  int nx,       //image width
+  int ny,       //image height
+  int nz,       // number of color channels in image
   double factor = 0.5 //zoom factor between 0 and 1
 );
 

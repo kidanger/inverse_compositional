@@ -95,6 +95,47 @@ void zoom_out
 
 /**
   *
+  * Function to downsample the mask
+  *
+**/
+void zoom_out_mask
+(
+  bool *I,    //input image
+  bool *Iout, //output image
+  int nx,       //image width
+  int ny,       //image height
+  int nz,       // number of color channels in image
+  double factor //zoom factor between 0 and 1
+)
+{
+  int nxx, nyy;
+  double ifactor = 1.0/factor;
+  zoom_size(nx, ny, nxx, nyy, factor);
+
+  int d = ceil(1/factor);
+  for (int i1=0; i1<nyy; i1++)
+  {
+    for (int j1=0; j1<nxx; j1++)
+    {
+      int i2= i1*ifactor;
+      int j2= j1*ifactor;
+      for(int index_color=0; index_color<nz; index_color++)
+      {
+        bool masked = false;
+        for (int xx = 0; xx < d; xx++) {
+          for (int yy = 0; yy < d; yy++) {
+            if (i1 + yy < ny && j1 + xx < nx)
+              masked |= I[((i2+yy)*nx+j2+xx)*nz+index_color];
+          }
+        }
+        Iout[(i1*nxx+j1)*nz+index_color] = masked;
+      }
+    }
+  }
+}
+
+/**
+  *
   * Function to upsample the parameters of the transformation
   *
 **/
