@@ -17,6 +17,7 @@
 #include "file.h"
 #include "transformation.h"
 #include "bicubic_interpolation.h"
+#include "smapa.h"
 
 #define PAR_DEFAULT_NSCALES 0
 #define PAR_DEFAULT_ZFACTOR 0.5
@@ -32,6 +33,15 @@
 #define PAR_DEFAULT_NANIFOUTSIDE 1
 #define PAR_DEFAULT_TYPE_GRADIENT 3
 #define PAR_DEFAULT_OUTPUT 0
+
+SMART_PARAMETER(P0, 0.);
+SMART_PARAMETER(P1, 0.);
+SMART_PARAMETER(P2, 0.);
+SMART_PARAMETER(P3, 0.);
+SMART_PARAMETER(P4, 0.);
+SMART_PARAMETER(P5, 0.);
+SMART_PARAMETER(P6, 0.);
+SMART_PARAMETER(P7, 0.);
 
 /**
  *
@@ -347,8 +357,25 @@ int main (int argc, char *argv[])
 
       //allocate memory for the parametric model
       double *p=new double[nparams];
-      for (int i=0; i<nparams; i++) {
-        p[i] = 0.;
+      switch (nparams) {
+        case 8:
+          p[6] = P6();
+          p[7] = P7();
+          // fall through
+        case 6:
+          p[4] = P4();
+          p[5] = P5();
+          // fall through
+        case 4:
+          p[3] = P3();
+          // fall through
+        case 3:
+          p[2] = P2();
+          // fall through
+        case 2:
+          p[0] = P0();
+          p[1] = P1();
+          // fall through
       }
 
       if( graymethod && nz==3 ) {
