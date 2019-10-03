@@ -101,6 +101,7 @@ void print_help(char *name)
   printf("         \t   2-Farid 3x3; 3-Farid 5x5; 4-Sigma 3; 5-Sigma 6\n");
   printf("         \t   Default value %d\n",
                         PAR_DEFAULT_TYPE_GRADIENT);
+  printf(" -L      \t Apply the Laplacian at each scale.\n");
   printf(" -v      \t Switch on verbose mode. \n\n\n");
 }
 
@@ -121,6 +122,7 @@ int read_parameters(
     int    &nparams,
     int    &robust,
     double &lambda,
+    int    &laplacian,
     int    &verbose,
     int    &first_scale,
     int    &graymethod,
@@ -147,6 +149,7 @@ int read_parameters(
     nparams      =PAR_DEFAULT_TYPE;
     robust       =PAR_DEFAULT_ROBUST;
     lambda       =PAR_DEFAULT_LAMBDA;
+    laplacian    =0;
     verbose      =PAR_DEFAULT_VERBOSE;
     first_scale  =PAR_DEFAULT_FIRST_SCALE;
     graymethod   =PAR_DEFAULT_GRAYMETHOD;
@@ -209,6 +212,9 @@ int read_parameters(
       if(strcmp(argv[i],"-o")==0)
         if(i<argc-1)
           type_output=atoi(argv[++i]);
+
+      if(strcmp(argv[i],"-L")==0)
+        laplacian=1;
 
       if(strcmp(argv[i],"-v")==0)
         verbose=1;
@@ -295,14 +301,14 @@ int main (int argc, char *argv[])
   //parameters of the method
   char  *image1, *image2;
   const char *outfile;
-  int    nscales, nparams, robust, verbose, first_scale, graymethod;
+  int    nscales, nparams, robust, laplacian, verbose, first_scale, graymethod;
   int    delta, nanifoutside, type_gradient, type_output;
   double zfactor, TOL, lambda;
 
   //read the parameters from the console
   int result=read_parameters(
         argc, argv, &image1, &image2, &outfile, nscales,
-        zfactor, TOL, nparams, robust, lambda, verbose, first_scale,
+        zfactor, TOL, nparams, robust, lambda, laplacian, verbose, first_scale,
         graymethod, delta, nanifoutside, type_gradient, type_output
       );
 
@@ -402,7 +408,7 @@ int main (int argc, char *argv[])
         pyramidal_inverse_compositional_algorithm(
            I1g, I2g, M1g, M2g, p, nparams, nx, ny, 1,
            nscales, zfactor, TOL, robust, lambda, first_scale, nanifoutside,
-           delta, type_gradient, verbose
+           delta, type_gradient, laplacian, verbose
         );
 
         if(verbose)
@@ -420,7 +426,7 @@ int main (int argc, char *argv[])
         pyramidal_inverse_compositional_algorithm(
            I1, I2, M1, M2, p, nparams, nx, ny, nz,
            nscales, zfactor, TOL, robust, lambda, first_scale, nanifoutside,
-           delta, type_gradient, verbose
+           delta, type_gradient, laplacian, verbose
         );
 
         if(verbose)

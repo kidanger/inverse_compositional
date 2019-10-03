@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <cmath>
 #include <stdio.h>
+#include <cstring>
 
 #include "bicubic_interpolation.h"
 #include "inverse_compositional_algorithm.h"
@@ -648,6 +649,7 @@ void pyramidal_inverse_compositional_algorithm(
     int nanifoutside,  //parameter for discarding boundary pixels
     int delta,         //distance to the boundary
     int type_gradient, //type of gradient
+    bool   laplacian,  //apply the laplacian or not
     bool   verbose     //switch on messages
 )
 {
@@ -714,6 +716,34 @@ void pyramidal_inverse_compositional_algorithm(
         if (!M2s[s][i])
           I2s[s][i] = NAN;
       }
+    }
+
+    if (laplacian) {
+      double* m = new double[size];
+      for(int s=0; s<nscales; s++)
+      {
+#define MIN(a, b) ((a)<(b)?(a):(b))
+#define MAX(a, b) ((a)>(b)?(a):(b))
+#define GET(i, x, y, z) (i)[z+nzz*(nx[s]*MIN(MAX(0,y),ny[s])+MIN(MAX(x,0),nx[s]))]
+        double* arrs[] = {I1s[s], I2s[s]};
+        for (int a = 0; a < 2; a++) {
+          double* I = arrs[a];
+          memcpy(m, I, nx[s]*ny[s]*nzz*sizeof(double));
+          for (int x = 0; x < nx[s]; x++) {
+            for (int y = 0; y < ny[s]; y++) {
+              for (int z = 0; z < nzz; z++) {
+                double l = 4 * GET(m, x, y, z) - (GET(m, x-1, y, z) + GET(m, x+1, y, z)
+                                                + GET(m, x, y-1, z) + GET(m, x, y+1, z));
+                GET(I, x, y, z) = l;
+              }
+            }
+          }
+        }
+#undef GET
+#undef MAX
+#undef MIN
+      }
+      free(m);
     }
 
     //delete allocated memory for unused scales
