@@ -121,11 +121,11 @@ void zoom_out_mask
       int j2= j1*ifactor;
       for(int index_color=0; index_color<nz; index_color++)
       {
-        bool masked = false;
+        bool masked = true;
         for (int xx = 0; xx < d; xx++) {
           for (int yy = 0; yy < d; yy++) {
-            if (i1 + yy < ny && j1 + xx < nx)
-              masked |= I[((i2+yy)*nx+j2+xx)*nz+index_color];
+            if (i2 + yy < ny && j2 + xx < nx)
+              masked &= I[((i2+yy)*nx+j2+xx)*nz+index_color];
           }
         }
         Iout[(i1*nxx+j1)*nz+index_color] = masked;
