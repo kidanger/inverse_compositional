@@ -121,7 +121,7 @@ void pyramidal_inverse_compositional_algorithm(
    int nanifoutside,  //parameter for discarding boundary pixels
    int delta,         //distance to the boundary
    int type_gradient, //type of gradient
-    bool   laplacian, //apply laplacian
+    int   laplacian, //apply laplacian
     bool   verbose    //switch on messages
 );
 

@@ -101,7 +101,7 @@ void print_help(char *name)
   printf("         \t   2-Farid 3x3; 3-Farid 5x5; 4-Sigma 3; 5-Sigma 6\n");
   printf("         \t   Default value %d\n",
                         PAR_DEFAULT_TYPE_GRADIENT);
-  printf(" -L      \t Apply the Laplacian at each scale.\n");
+  printf(" -L 1    \t Apply the Laplacian at each scale.\n");
   printf(" -v      \t Switch on verbose mode. \n\n\n");
 }
 
@@ -214,7 +214,7 @@ int read_parameters(
           type_output=atoi(argv[++i]);
 
       if(strcmp(argv[i],"-L")==0)
-        laplacian=1;
+        laplacian=atoi(argv[++i]);
 
       if(strcmp(argv[i],"-v")==0)
         verbose=1;
