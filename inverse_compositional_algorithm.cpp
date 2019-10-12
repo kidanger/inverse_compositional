@@ -732,7 +732,7 @@ void pyramidal_inverse_compositional_algorithm(
           }
         }
       }
-      free(m);
+      delete[] m;
     } else if (laplacian == 2) {
       if (laplacian) {
         double* m = new double[size];
@@ -759,7 +759,7 @@ void pyramidal_inverse_compositional_algorithm(
 #undef MAX
 #undef MIN
         }
-        free(m);
+        delete[] m;
       }
     }
 
